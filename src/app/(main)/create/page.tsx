@@ -331,7 +331,7 @@ export default function CreateEventPage() {
                           {eventData.tickets.map((ticket, index) => (
                               <div key={index} className="flex justify-between text-sm text-muted-foreground p-3 border rounded-lg bg-secondary/30">
                                   <span>{ticket.name}</span>
-                                  <span className="font-mono">{ticket.quantity} x ${ticket.price.toFixed(2)}</span>
+                                  <span className="font-mono">{ticket.quantity} x ${Number(ticket.price).toFixed(2)}</span>
                               </div>
                           ))}
                       </div>
@@ -348,5 +348,3 @@ export default function CreateEventPage() {
     </div>
   );
 }
-
-    
