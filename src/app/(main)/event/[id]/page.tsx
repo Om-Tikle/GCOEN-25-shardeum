@@ -11,9 +11,10 @@ import { Tag, Calendar, Clock, MapPin, Star, Ticket, Users } from "lucide-react"
 import ResaleAnalysis from "@/components/ResaleAnalysis";
 import { useUser } from "@/context/UserContext";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
+export default function EventDetailPage() {
+  const params = useParams();
   const event = mockEvents.find(e => e.id === params.id) || mockEvents[0];
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-hero');
   const { user, setUser } = useUser();
