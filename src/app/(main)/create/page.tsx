@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, PlusCircle, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, PlusCircle, Trash2, Upload, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type TicketType = {
   id: number;
@@ -19,17 +21,34 @@ type TicketType = {
 export default function CreateEventPage() {
   const [step, setStep] = useState(1);
   const [tickets, setTickets] = useState<TicketType[]>([
-    { id: 1, name: "General Admission", quantity: "100", price: "25" },
+    { id: 1, name: "Normal", quantity: "100", price: "25" },
   ]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const progress = (step / 3) * 100;
 
+  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const addTicketType = () => {
-    setTickets([...tickets, { id: Date.now(), name: "", quantity: "", price: "" }]);
+    setTickets([...tickets, { id: Date.now(), name: "Normal", quantity: "", price: "" }]);
   };
 
   const removeTicketType = (id: number) => {
     setTickets(tickets.filter(ticket => ticket.id !== id));
+  };
+  
+  const handleTicketChange = (id: number, field: keyof Omit<TicketType, 'id'>, value: string) => {
+    setTickets(tickets.map(ticket => ticket.id === id ? { ...ticket, [field]: value } : ticket));
   };
 
   return (
@@ -76,10 +95,25 @@ export default function CreateEventPage() {
               </div>
                <div className="space-y-2">
                 <Label>Event Image</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center">
-                    <Upload className="h-10 w-10 text-muted-foreground mb-2"/>
-                    <p className="text-muted-foreground">Drag & drop an image here, or click to select</p>
-                    <Button variant="outline" size="sm" className="mt-4">Upload Image</Button>
+                <div 
+                  className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden"/>
+                  {imagePreview ? (
+                    <div className="relative w-full h-48">
+                      <Image src={imagePreview} alt="Event preview" fill className="rounded-md object-contain" />
+                       <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={(e) => { e.stopPropagation(); setImagePreview(null); if(fileInputRef.current) fileInputRef.current.value = "";}}>
+                          <X className="h-4 w-4"/>
+                       </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="h-10 w-10 text-muted-foreground mb-2"/>
+                      <p className="text-muted-foreground">Drag & drop an image here, or click to select</p>
+                      <Button variant="outline" size="sm" className="mt-4 pointer-events-none">Upload Image</Button>
+                    </>
+                  )}
                 </div>
               </div>
               <Button onClick={() => setStep(2)} className="w-full md:w-auto">Next: Ticket Details</Button>
@@ -94,7 +128,7 @@ export default function CreateEventPage() {
               <CardDescription>Define the tickets for your event.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {tickets.map((ticket, index) => (
+              {tickets.map((ticket) => (
                 <div key={ticket.id} className="p-4 border rounded-lg space-y-4 relative">
                   {tickets.length > 1 && (
                      <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeTicketType(ticket.id)}>
@@ -103,16 +137,28 @@ export default function CreateEventPage() {
                   )}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                      <div className="space-y-2 md:col-span-1">
-                        <Label htmlFor={`ticketName-${index}`}>Ticket Name</Label>
-                        <Input id={`ticketName-${index}`} placeholder="e.g. VIP Access" defaultValue={ticket.name}/>
+                        <Label htmlFor={`ticketName-${ticket.id}`}>Ticket Type</Label>
+                        <Select
+                            value={ticket.name}
+                            onValueChange={(value) => handleTicketChange(ticket.id, 'name', value)}
+                        >
+                            <SelectTrigger id={`ticketName-${ticket.id}`}>
+                                <SelectValue placeholder="Select a type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Normal">Normal</SelectItem>
+                                <SelectItem value="VIP">VIP</SelectItem>
+                                <SelectItem value="VVIP">VVIP</SelectItem>
+                            </SelectContent>
+                        </Select>
                      </div>
                      <div className="space-y-2">
-                        <Label htmlFor={`ticketQuantity-${index}`}>Quantity</Label>
-                        <Input id={`ticketQuantity-${index}`} type="number" placeholder="100" defaultValue={ticket.quantity}/>
+                        <Label htmlFor={`ticketQuantity-${ticket.id}`}>Quantity</Label>
+                        <Input id={`ticketQuantity-${ticket.id}`} type="number" placeholder="100" value={ticket.quantity} onChange={(e) => handleTicketChange(ticket.id, 'quantity', e.target.value)}/>
                      </div>
                      <div className="space-y-2">
-                        <Label htmlFor={`ticketPrice-${index}`}>Price ($)</Label>
-                        <Input id={`ticketPrice-${index}`} type="number" placeholder="50.00" defaultValue={ticket.price}/>
+                        <Label htmlFor={`ticketPrice-${ticket.id}`}>Price ($)</Label>
+                        <Input id={`ticketPrice-${ticket.id}`} type="number" placeholder="50.00" value={ticket.price} onChange={(e) => handleTicketChange(ticket.id, 'price', e.target.value)}/>
                      </div>
                   </div>
                 </div>
@@ -144,6 +190,14 @@ export default function CreateEventPage() {
                         <p><strong className="text-foreground">Location:</strong> Main Campus Quad</p>
                     </div>
                 </div>
+                 {imagePreview && (
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2 font-headline">Event Image</h3>
+                    <div className="relative w-full h-48">
+                      <Image src={imagePreview} alt="Event preview" fill className="rounded-md object-contain border" />
+                    </div>
+                  </div>
+                )}
                 <div>
                     <h3 className="font-semibold text-lg mb-2 font-headline">Tickets</h3>
                     <div className="space-y-2">
