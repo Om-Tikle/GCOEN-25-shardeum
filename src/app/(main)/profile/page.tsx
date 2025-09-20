@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { mockResaleTickets, mockEvents } from "@/lib/mock-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,27 +22,28 @@ export default function ProfilePage() {
   // Local state for form inputs
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-
-  // Store original values for cancel
-  const [originalName, setOriginalName] = useState(user?.name || '');
-  const [originalEmail, setOriginalEmail] = useState(user?.email || '');
   
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+    }
+  }, [user]);
 
   if (!user) {
     return null; // Or a loading spinner
   }
 
   const handleEdit = () => {
-    setOriginalName(user.name);
-    setOriginalEmail(user.email);
-    setName(user.name);
-    setEmail(user.email);
     setIsEditing(true);
   }
 
   const handleSave = () => {
-    setUser({ ...user, name, email });
+    if (user) {
+      setUser({ ...user, name, email });
+    }
     setIsEditing(false);
     toast({
       title: "Profile Updated",
@@ -51,6 +52,10 @@ export default function ProfilePage() {
   };
 
   const handleCancel = () => {
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+    }
     setIsEditing(false);
   };
   
