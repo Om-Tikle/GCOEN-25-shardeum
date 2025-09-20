@@ -59,6 +59,7 @@ export type MockTransaction = {
 
 export type MockNftTicket = {
     id: string;
+    eventId: string;
     eventName: string;
     ticketType: string;
     eventDate: string;
@@ -69,6 +70,7 @@ export type MockNftTicket = {
 export const mockNftTickets: MockNftTicket[] = [
     {
         id: 'nft-1',
+        eventId: 'event-1',
         eventName: "Annual Summer Music Fest",
         ticketType: "VIP Pass",
         eventDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -77,6 +79,7 @@ export const mockNftTickets: MockNftTicket[] = [
     },
     {
         id: 'nft-2',
+        eventId: 'event-4',
         eventName: "Homecoming Football Game",
         ticketType: "Student Section",
         eventDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),

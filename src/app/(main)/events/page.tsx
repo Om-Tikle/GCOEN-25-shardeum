@@ -1,11 +1,15 @@
+"use client";
+
 import EventCard from "@/components/EventCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockEvents } from "@/lib/mock-data";
+import { useEvents } from "@/context/EventContext";
 import { Search, ListFilter } from "lucide-react";
 
 export default function EventsPage() {
+  const { events } = useEvents();
+
   return (
     <div className="p-4 md:p-8">
       <header className="mb-8">
@@ -38,11 +42,8 @@ export default function EventsPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {mockEvents.map((event) => (
+        {events.map((event) => (
           <EventCard key={event.id} event={event} />
-        ))}
-        {mockEvents.map((event) => (
-          <EventCard key={`${event.id}-2`} event={{...event, id: `${event.id}-2`}} />
         ))}
       </div>
     </div>

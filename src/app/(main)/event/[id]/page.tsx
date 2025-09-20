@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { mockEvents, mockTickets, mockResaleTickets, mockReviews, type MockTicket, type MockNftTicket } from "@/lib/mock-data";
+import { type MockTicket, type MockNftTicket } from "@/lib/mock-data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,11 +14,15 @@ import ResaleAnalysis from "@/components/ResaleAnalysis";
 import { useUser } from "@/context/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useParams } from "next/navigation";
+import { useEvents } from "@/context/EventContext";
+import { mockResaleTickets, mockReviews, mockTickets } from "@/lib/mock-data";
 
 export default function EventDetailPage() {
   const params = useParams();
-  const event = mockEvents.find(e => e.id === params.id) || mockEvents[0];
-  const heroImage = PlaceHolderImages.find(img => img.id === 'event-hero');
+  const { events } = useEvents();
+  const event = events.find(e => e.id === params.id);
+  
+  const heroImage = PlaceHolderImages.find(img => img.id === event?.imageId || img.id === 'event-hero');
   const { user, setUser } = useUser();
   const { toast } = useToast();
   const router = useRouter();
@@ -29,6 +33,13 @@ export default function EventDetailPage() {
     setIsClient(true);
   }, []);
 
+  if (!event) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-muted-foreground">Event not found.</p>
+      </div>
+    );
+  }
 
   const handleBuyTicket = (ticket: MockTicket) => {
     if (!user) {
@@ -51,12 +62,13 @@ export default function EventDetailPage() {
 
     // Deduct credits and add new NFT ticket
     const newNftTicket: MockNftTicket = {
-        id: `nft-${Date.now()}`,
+        id: `nft-${event.id}-${ticket.id}-${Date.now()}`,
+        eventId: event.id,
         eventName: event.title,
         ticketType: ticket.name,
         eventDate: event.date,
         location: event.location,
-        imageId: 'ticket-nft-1' // You could randomize this or base it on event
+        imageId: event.imageId || 'ticket-nft-1'
     };
 
     setUser(currentUser => {

@@ -2,16 +2,17 @@
 
 import EventCard from "@/components/EventCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { mockEvents } from "@/lib/mock-data";
 import { Coins, Wallet } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useEvents } from "@/context/EventContext";
 
 export default function HomePage() {
   const { user } = useUser();
+  const { events } = useEvents();
   const { toast } = useToast();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
@@ -97,7 +98,7 @@ export default function HomePage() {
       <section>
         <h2 className="text-xl md:text-2xl font-headline mb-4">Upcoming Events</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {mockEvents.map((event) => (
+          {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
         </div>
