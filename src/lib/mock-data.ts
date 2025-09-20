@@ -7,6 +7,7 @@ export type MockUser = {
   avatarUrl: string;
   campusCredits: number;
   reputationScore: number;
+  nftTickets: MockNftTicket[];
 };
 
 export type MockEvent = {
@@ -65,6 +66,26 @@ export type MockNftTicket = {
     imageId: string;
 }
 
+export const mockNftTickets: MockNftTicket[] = [
+    {
+        id: 'nft-1',
+        eventName: "Annual Summer Music Fest",
+        ticketType: "VIP Pass",
+        eventDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        location: 'Main Campus Quad',
+        imageId: 'ticket-nft-1'
+    },
+    {
+        id: 'nft-2',
+        eventName: "Homecoming Football Game",
+        ticketType: "Student Section",
+        eventDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        location: 'University Stadium',
+        imageId: 'ticket-nft-2'
+    }
+];
+
+
 export const mockUser: MockUser = {
   id: 'user-1',
   name: 'Jane Doe',
@@ -72,6 +93,7 @@ export const mockUser: MockUser = {
   avatarUrl: PlaceHolderImages.find(img => img.id === 'profile-1')?.imageUrl || '',
   campusCredits: 1250,
   reputationScore: 4.8,
+  nftTickets: mockNftTickets,
 };
 
 export const mockEvents: MockEvent[] = [
@@ -167,25 +189,5 @@ export const mockTransactions: MockTransaction[] = [
         description: 'Ticket Sale: Art Show',
         amount: 10.00,
         type: 'credit',
-    }
-];
-
-
-export const mockNftTickets: MockNftTicket[] = [
-    {
-        id: 'nft-1',
-        eventName: "Annual Summer Music Fest",
-        ticketType: "VIP Pass",
-        eventDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        location: 'Main Campus Quad',
-        imageId: 'ticket-nft-1'
-    },
-    {
-        id: 'nft-2',
-        eventName: "Homecoming Football Game",
-        ticketType: "Student Section",
-        eventDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        location: 'University Stadium',
-        imageId: 'ticket-nft-2'
     }
 ];

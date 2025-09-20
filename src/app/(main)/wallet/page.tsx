@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ethers } from "ethers";
-import { mockTransactions, mockNftTickets, type MockTransaction } from "@/lib/mock-data";
+import { mockTransactions, type MockTransaction } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUser } from '@/context/UserContext';
+import Link from 'next/link';
 
 export default function WalletPage() {
   const { toast } = useToast();
@@ -295,16 +296,18 @@ export default function WalletPage() {
               <CardDescription>Your collection of verified event tickets.</CardDescription>
             </CardHeader>
             <CardContent>
-              {mockNftTickets.length > 0 ? (
+              {user.nftTickets.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {mockNftTickets.map(ticket => (
+                  {user.nftTickets.map(ticket => (
                     <NftTicketCard key={ticket.id} ticket={ticket} />
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-12 border-2 border-dashed rounded-lg">
                   <p className="text-muted-foreground">You don't have any tickets yet.</p>
-                  <Button variant="link" className="text-primary">Explore Events</Button>
+                  <Button asChild variant="link" className="text-primary">
+                    <Link href="/events">Explore Events</Link>
+                  </Button>
                 </div>
               )}
             </CardContent>

@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import { mockEvents, mockTickets, mockResaleTickets, mockReviews } from "@/lib/mock-data";
+import { mockEvents, mockTickets, mockResaleTickets, mockReviews, type MockTicket, type MockNftTicket } from "@/lib/mock-data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +9,63 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tag, Calendar, Clock, MapPin, Star, Ticket, Users } from "lucide-react";
 import ResaleAnalysis from "@/components/ResaleAnalysis";
+import { useUser } from "@/context/UserContext";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 export default function EventDetailPage({ params }: { params: { id: string } }) {
   const event = mockEvents.find(e => e.id === params.id) || mockEvents[0];
   const heroImage = PlaceHolderImages.find(img => img.id === 'event-hero');
+  const { user, setUser } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleBuyTicket = (ticket: MockTicket) => {
+    if (!user) {
+        toast({
+            variant: "destructive",
+            title: "Not Logged In",
+            description: "You need to be logged in to purchase tickets.",
+        });
+        return;
+    }
+    
+    if (user.campusCredits < ticket.price) {
+         toast({
+            variant: "destructive",
+            title: "Insufficient Credits",
+            description: "You don't have enough Campus Credits to buy this ticket.",
+        });
+        return;
+    }
+
+    // Deduct credits and add new NFT ticket
+    const newNftTicket: MockNftTicket = {
+        id: `nft-${Date.now()}`,
+        eventName: event.title,
+        ticketType: ticket.name,
+        eventDate: event.date,
+        location: event.location,
+        imageId: 'ticket-nft-1' // You could randomize this or base it on event
+    };
+
+    setUser(currentUser => {
+        if (!currentUser) return null;
+        return {
+            ...currentUser,
+            campusCredits: currentUser.campusCredits - ticket.price,
+            nftTickets: [...currentUser.nftTickets, newNftTicket]
+        }
+    });
+
+    toast({
+        title: "Purchase Successful!",
+        description: `Your ${ticket.name} for ${event.title} is now in your wallet.`,
+    });
+
+    router.push('/wallet');
+  };
+
 
   return (
     <div>
@@ -58,7 +113,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-bold text-primary">${ticket.price.toFixed(2)}</p>
-                      <Button size="sm" className="mt-1">Buy Now</Button>
+                      <Button size="sm" className="mt-1" onClick={() => handleBuyTicket(ticket)}>Buy Now</Button>
                     </div>
                   </div>
                 ))}
