@@ -3,11 +3,47 @@
 import EventCard from "@/components/EventCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { mockEvents } from "@/lib/mock-data";
-import { Coins } from "lucide-react";
+import { Coins, Wallet } from "lucide-react";
 import { useUser } from "@/context/UserContext";
+import { Button } from "@/components/ui/button";
+import { ethers } from "ethers";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function HomePage() {
   const { user } = useUser();
+  const { toast } = useToast();
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+
+  const handleConnectWallet = async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        setWalletAddress(address);
+        
+        toast({
+          title: "Wallet Connected",
+          description: `Connected with address: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`,
+        });
+        
+      } catch (err: any) {
+        toast({
+            variant: "destructive",
+            title: "Connection Failed",
+            description: "Could not connect to the wallet. Please try again.",
+        });
+      }
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Wallet Not Found",
+        description: "Please install a wallet extension like MetaMask.",
+      });
+    }
+  };
 
   if (!user) {
     return null; // Or a loading spinner
@@ -42,6 +78,20 @@ export default function HomePage() {
             </div>
             <Coins className="h-8 w-8 text-primary/70" />
           </div>
+      </section>
+
+      <section className="mb-8">
+        {!walletAddress ? (
+            <Button onClick={handleConnectWallet} variant="outline" className="w-full md:w-auto">
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet to Get Started
+            </Button>
+        ) : (
+             <div className="p-4 rounded-lg border bg-card text-center">
+                <p className="text-sm text-muted-foreground">Wallet Connected</p>
+                <p className="font-mono text-sm font-bold text-primary truncate">{walletAddress}</p>
+             </div>
+        )}
       </section>
 
       <section>
