@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,11 @@ import { useTheme } from "next-themes";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto">
@@ -82,11 +88,13 @@ export default function SettingsPage() {
                 <Label htmlFor="dark-mode" className="font-semibold">Dark Mode</Label>
                 <p className="text-sm text-muted-foreground">Reduce eye strain in low light.</p>
               </div>
-              <Switch
-                id="dark-mode"
-                checked={theme === 'dark'}
-                onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              />
+              {mounted && (
+                <Switch
+                  id="dark-mode"
+                  checked={theme === 'dark'}
+                  onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                />
+              )}
             </div>
             <Separator />
             <div className="flex items-center justify-between">
