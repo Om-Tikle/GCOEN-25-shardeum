@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { mockUser, mockResaleTickets, mockEvents } from "@/lib/mock-data";
+import { mockResaleTickets, mockEvents } from "@/lib/mock-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,36 +12,38 @@ import { Label } from "@/components/ui/label";
 import { LogOut, Star, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/context/UserContext";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { user, setUser } = useUser();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(mockUser.name);
-  const [email, setEmail] = useState(mockUser.email);
+  
+  // Local state for form inputs
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   // Store original values for cancel
-  const [originalName, setOriginalName] = useState(mockUser.name);
-  const [originalEmail, setOriginalEmail] = useState(mockUser.email);
+  const [originalName, setOriginalName] = useState(user?.name || '');
+  const [originalEmail, setOriginalEmail] = useState(user?.email || '');
   
   const { toast } = useToast();
 
+  if (!user) {
+    return null; // Or a loading spinner
+  }
+
   const handleEdit = () => {
-    setOriginalName(name);
-    setOriginalEmail(email);
+    setOriginalName(user.name);
+    setOriginalEmail(user.email);
+    setName(user.name);
+    setEmail(user.email);
     setIsEditing(true);
   }
 
   const handleSave = () => {
-    // Here you would typically save the data to your backend
-    console.log("Saving:", { name, email });
-    
-    // For this mock setup, we update the mockUser object
-    // Note: this change is not persistent and will reset on page reload
-    mockUser.name = name;
-    mockUser.email = email;
-
+    setUser({ ...user, name, email });
     setIsEditing(false);
-
     toast({
       title: "Profile Updated",
       description: "Your changes have been saved.",
@@ -49,8 +51,6 @@ export default function ProfilePage() {
   };
 
   const handleCancel = () => {
-    setName(originalName);
-    setEmail(originalEmail);
     setIsEditing(false);
   };
   
@@ -66,14 +66,14 @@ export default function ProfilePage() {
         <div className="bg-secondary/50 h-32" />
         <CardContent className="p-6 text-center -mt-20">
           <Avatar className="w-32 h-32 mx-auto border-4 border-background shadow-lg">
-            <AvatarImage src={mockUser.avatarUrl} alt={name} />
-            <AvatarFallback className="text-4xl">{name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={user.avatarUrl} alt={name} />
+            <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
           </Avatar>
           
           {!isEditing ? (
             <>
-              <h1 className="text-3xl font-headline mt-4">{name}</h1>
-              <p className="text-muted-foreground">{email}</p>
+              <h1 className="text-3xl font-headline mt-4">{user.name}</h1>
+              <p className="text-muted-foreground">{user.email}</p>
             </>
           ) : (
             <div className="mt-4 max-w-sm mx-auto space-y-4 text-left">
@@ -90,7 +90,7 @@ export default function ProfilePage() {
 
           <div className="flex items-center justify-center gap-2 mt-2">
             <Star className="w-5 h-5 text-primary" />
-            <span className="text-lg font-bold">{mockUser.reputationScore}</span>
+            <span className="text-lg font-bold">{user.reputationScore}</span>
             <span className="text-sm text-muted-foreground">Reputation</span>
           </div>
 

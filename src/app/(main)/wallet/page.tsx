@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ethers } from "ethers";
-import { mockUser, mockTransactions, mockNftTickets, type MockTransaction } from "@/lib/mock-data";
+import { mockTransactions, mockNftTickets, type MockTransaction } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -22,15 +22,20 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useUser } from '@/context/UserContext';
 
 export default function WalletPage() {
   const { toast } = useToast();
+  const { user, setUser } = useUser();
   const [isAddingFunds, setIsAddingFunds] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [addAmount, setAddAmount] = useState('0.01');
   const [withdrawAmount, setWithdrawAmount] = useState('100');
-  const [user, setUser] = useState(mockUser);
   const [transactions, setTransactions] = useState(mockTransactions);
+
+  if (!user) {
+    return null; // Or a loading spinner
+  }
 
   const handleAddFunds = async () => {
     setIsAddingFunds(true);
@@ -65,10 +70,10 @@ export default function WalletPage() {
       const creditsToAdd = Math.floor(ethAmount * 10000); // 1 ETH = 10,000 credits
       const dollarValue = creditsToAdd * 0.1;
 
-      setUser(currentUser => ({
+      setUser(currentUser => currentUser ? ({
           ...currentUser,
           campusCredits: currentUser.campusCredits + creditsToAdd
-      }));
+      }) : null);
 
       const newTransaction: MockTransaction = {
           id: `tx-${Date.now()}`,
@@ -131,10 +136,10 @@ export default function WalletPage() {
         
         const dollarValue = creditsToWithdraw * 0.1;
 
-        setUser(currentUser => ({
+        setUser(currentUser => currentUser ? ({
             ...currentUser,
             campusCredits: currentUser.campusCredits - creditsToWithdraw,
-        }));
+        }) : null);
 
         const newTransaction: MockTransaction = {
             id: `tx-${Date.now()}`,
