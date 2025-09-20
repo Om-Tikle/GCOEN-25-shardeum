@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ethers } from "ethers";
-import { mockUser, mockTransactions, mockNftTickets } from "@/lib/mock-data";
+import { mockUser, mockTransactions, mockNftTickets, type MockTransaction } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -27,6 +27,8 @@ export default function WalletPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [amount, setAmount] = useState('0.01');
+  const [user, setUser] = useState(mockUser);
+  const [transactions, setTransactions] = useState(mockTransactions);
 
   const handleAddFunds = async () => {
     setIsLoading(true);
@@ -56,10 +58,30 @@ export default function WalletPage() {
       });
 
       await tx.wait();
+      
+      const ethAmount = parseFloat(amount);
+      const creditsToAdd = Math.floor(ethAmount * 10000); // 1 ETH = 10,000 credits
+      const dollarValue = creditsToAdd * 0.1;
+
+      setUser(currentUser => ({
+          ...currentUser,
+          campusCredits: currentUser.campusCredits + creditsToAdd
+      }));
+
+      const newTransaction: MockTransaction = {
+          id: `tx-${Date.now()}`,
+          date: new Date().toISOString(),
+          description: 'Campus Credits Deposit',
+          amount: dollarValue,
+          type: 'credit'
+      };
+
+      setTransactions(currentTransactions => [newTransaction, ...currentTransactions]);
+
 
       toast({
         title: "Transaction Confirmed",
-        description: "Funds added successfully (simulation).",
+        description: `${creditsToAdd} Campus Credits have been added to your account.`,
       });
 
     } catch (error: any) {
@@ -70,7 +92,7 @@ export default function WalletPage() {
       });
     } finally {
       setIsLoading(false);
-      // Close the dialog after handling everything. A bit of a hacky way to do it.
+      // Close the dialog after handling everything.
       document.getElementById('close-add-funds-dialog')?.click();
     }
   };
@@ -92,9 +114,9 @@ export default function WalletPage() {
             <CardContent>
               <div className="flex items-baseline gap-2">
                 <Coins className="h-8 w-8" />
-                <p className="text-5xl font-bold">{mockUser.campusCredits.toLocaleString()}</p>
+                <p className="text-5xl font-bold">{user.campusCredits.toLocaleString()}</p>
               </div>
-              <p className="mt-1 opacity-80">Equivalent to ${(mockUser.campusCredits * 0.1).toFixed(2)}</p>
+              <p className="mt-1 opacity-80">Equivalent to ${(user.campusCredits * 0.1).toFixed(2)}</p>
               <div className="flex gap-2 mt-6">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -104,7 +126,7 @@ export default function WalletPage() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Add Funds with MetaMask</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Enter the amount of ETH you'd like to convert to Campus Credits. This will open a MetaMask transaction prompt.
+                        Enter the amount of ETH you'd like to convert to Campus Credits. This will open a MetaMask transaction prompt. (1 ETH = 10,000 Credits)
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="py-4">
@@ -140,7 +162,7 @@ export default function WalletPage() {
               <CardTitle className="font-headline">Transaction History</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {mockTransactions.map((tx, index) => (
+              {transactions.map((tx, index) => (
                 <div key={tx.id}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -156,7 +178,7 @@ export default function WalletPage() {
                       {tx.type === 'credit' ? '+' : '-'} ${tx.amount.toFixed(2)}
                     </p>
                   </div>
-                  {index < mockTransactions.length - 1 && <Separator className="my-3" />}
+                  {index < transactions.length - 1 && <Separator className="my-3" />}
                 </div>
               ))}
             </CardContent>
