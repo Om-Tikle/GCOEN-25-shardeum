@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { mockUser, mockResaleTickets, mockEvents } from "@/lib/mock-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,11 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Star, TrendingUp } from "lucide-react";
+import { LogOut, Star, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(mockUser.name);
   const [email, setEmail] = useState(mockUser.email);
@@ -51,6 +53,12 @@ export default function ProfilePage() {
     setEmail(originalEmail);
     setIsEditing(false);
   };
+  
+  const handleLogout = () => {
+    // Here you would typically handle actual logout logic (e.g., clearing session, tokens)
+    console.log("Logging out...");
+    router.push('/');
+  };
 
   return (
     <div className="p-4 md:p-8">
@@ -86,11 +94,16 @@ export default function ProfilePage() {
             <span className="text-sm text-muted-foreground">Reputation</span>
           </div>
 
-          <div className="mt-4 space-x-2">
+          <div className="mt-4 flex justify-center items-center space-x-2">
             {!isEditing ? (
-              <Button variant="outline" size="sm" onClick={handleEdit}>
-                Edit Profile
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={handleEdit}>
+                  Edit Profile
+                </Button>
+                 <Button variant="destructive" size="sm" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" /> Logout
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="outline" size="sm" onClick={handleCancel}>
