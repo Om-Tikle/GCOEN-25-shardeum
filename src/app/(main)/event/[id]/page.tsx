@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { mockEvents, mockTickets, mockResaleTickets, mockReviews, type MockTicket, type MockNftTicket } from "@/lib/mock-data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -20,6 +22,13 @@ export default function EventDetailPage() {
   const { user, setUser } = useUser();
   const { toast } = useToast();
   const router = useRouter();
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const handleBuyTicket = (ticket: MockTicket) => {
     if (!user) {
@@ -88,7 +97,7 @@ export default function EventDetailPage() {
           <h1 className="text-3xl md:text-4xl font-headline text-primary mb-2">{event.title}</h1>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-muted-foreground font-body">
             <div className="flex items-center gap-2"><Calendar className="h-4 w-4" /> {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-            <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> {new Date(event.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> {isClient ? new Date(event.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '...'}</div>
             <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {event.location}</div>
             <div className="flex items-center gap-2"><Tag className="h-4 w-4" /> {event.category}</div>
           </div>
