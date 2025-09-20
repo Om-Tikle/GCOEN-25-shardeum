@@ -1,3 +1,53 @@
+
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "event-1",
+      "description": "A lively concert with a crowd and vibrant stage lights.",
+      "imageUrl": "https://picsum.photos/seed/event1/600/400",
+      "imageHint": "concert music"
+    },
+    {
+      "id": "event-2",
+      "description": "A speaker giving a presentation at a tech conference.",
+      "imageUrl": "https://picsum.photos/seed/event2/600/400",
+      "imageHint": "conference tech"
+    },
+    {
+      "id": "event-3",
+      "description": "An art gallery exhibition with paintings on the wall.",
+      "imageUrl": "https://picsum.photos/seed/event3/600/400",
+      "imageHint": "art gallery"
+    },
+    {
+      "id": "event-4",
+      "description": "Students celebrating at a campus festival.",
+      "imageUrl": "https://picsum.photos/seed/event4/600/400",
+      "imageHint": "campus festival"
+    },
+    {
+      "id": "profile-1",
+      "description": "Profile picture of a user.",
+      "imageUrl": "https://picsum.photos/seed/profile1/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "ticket-nft-1",
+      "description": "NFT ticket for a music festival.",
+      "imageUrl": "https://picsum.photos/seed/nft1/300/400",
+      "imageHint": "abstract pattern"
+    },
+    {
+      "id": "ticket-nft-2",
+      "description": "NFT ticket for a sports game.",
+      "imageUrl": "https://picsum.photos/seed/nft2/300/400",
+      "imageHint": "geometric design"
+    },
+    {
+      "id": "event-hero",
+      "description": "A grand hero image for an event detail page.",
+      "imageUrl": "https://picsum.photos/seed/eventHero/1200/400",
+      "imageHint": "event stage"
+    }
+  ]
 }

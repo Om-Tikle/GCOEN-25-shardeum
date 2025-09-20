@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CampusConnectLogo } from "@/components/icons";
-import { Wallet } from "lucide-react";
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md">
@@ -17,37 +16,33 @@ export default function LoginPage() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Login</CardTitle>
-            <CardDescription>Enter your credentials to access your account.</CardDescription>
+            <CardTitle className="font-headline text-2xl">Sign Up</CardTitle>
+            <CardDescription>Create your account to start exploring events.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" type="text" placeholder="John Doe" required />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" placeholder="m@example.com" required />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link href="#" className="ml-auto inline-block text-sm underline">
-                    Forgot your password?
-                  </Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" required />
               </div>
-              <Link href="/home" className="w-full">
+              <Link href="/home">
                 <Button type="submit" className="w-full">
-                  Login
+                  Create Account
                 </Button>
               </Link>
-              <Button variant="outline" className="w-full">
-                <Wallet className="mr-2 h-4 w-4" /> Connect Wallet
-              </Button>
             </form>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
-                Sign up
+              Already have an account?{" "}
+              <Link href="/" className="underline">
+                Login
               </Link>
             </div>
           </CardContent>
