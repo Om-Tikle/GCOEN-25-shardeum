@@ -1,12 +1,60 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { ethers } from "ethers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CampusConnectLogo } from "@/components/icons";
 import { Wallet } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+  
+  const handleConnectWallet = async () => {
+    setError(null);
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        // It requests the user to authorize the connection
+        await provider.send("eth_requestAccounts", []);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        
+        toast({
+          title: "Wallet Connected",
+          description: `Connected with address: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`,
+        });
+
+        // Redirect to home page after successful connection
+        router.push('/home');
+        
+      } catch (err: any) {
+        setError(err.message || "An error occurred while connecting the wallet.");
+        toast({
+            variant: "destructive",
+            title: "Connection Failed",
+            description: "Could not connect to the wallet. Please try again.",
+        });
+      }
+    } else {
+      setError("MetaMask is not installed. Please install it to connect your wallet.");
+      toast({
+        variant: "destructive",
+        title: "Wallet Not Found",
+        description: "Please install a wallet extension like MetaMask.",
+      });
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md">
@@ -21,6 +69,15 @@ export default function LoginPage() {
             <CardDescription>Enter your credentials to access your account.</CardDescription>
           </CardHeader>
           <CardContent>
+             {error && (
+              <Alert variant="destructive" className="mb-4">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
             <form className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -40,7 +97,7 @@ export default function LoginPage() {
                   Login
                 </Button>
               </Link>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" type="button" onClick={handleConnectWallet}>
                 <Wallet className="mr-2 h-4 w-4" /> Connect Wallet
               </Button>
             </form>
