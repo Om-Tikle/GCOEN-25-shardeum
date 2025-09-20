@@ -10,24 +10,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Star, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(mockUser.name);
   const [email, setEmail] = useState(mockUser.email);
 
+  // Store original values for cancel
+  const [originalName, setOriginalName] = useState(mockUser.name);
+  const [originalEmail, setOriginalEmail] = useState(mockUser.email);
+  
+  const { toast } = useToast();
+
+  const handleEdit = () => {
+    setOriginalName(name);
+    setOriginalEmail(email);
+    setIsEditing(true);
+  }
+
   const handleSave = () => {
     // Here you would typically save the data to your backend
     console.log("Saving:", { name, email });
-    // For now, we'll just update the mock data reference in the state
+    
+    // For this mock setup, we update the mockUser object
+    // Note: this change is not persistent and will reset on page reload
     mockUser.name = name;
     mockUser.email = email;
+
     setIsEditing(false);
+
+    toast({
+      title: "Profile Updated",
+      description: "Your changes have been saved.",
+    });
   };
 
   const handleCancel = () => {
-    setName(mockUser.name);
-    setEmail(mockUser.email);
+    setName(originalName);
+    setEmail(originalEmail);
     setIsEditing(false);
   };
 
@@ -67,7 +88,7 @@ export default function ProfilePage() {
 
           <div className="mt-4 space-x-2">
             {!isEditing ? (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Button variant="outline" size="sm" onClick={handleEdit}>
                 Edit Profile
               </Button>
             ) : (
