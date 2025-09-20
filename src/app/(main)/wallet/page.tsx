@@ -25,20 +25,22 @@ import { Label } from '@/components/ui/label';
 
 export default function WalletPage() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [amount, setAmount] = useState('0.01');
+  const [isAddingFunds, setIsAddingFunds] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [addAmount, setAddAmount] = useState('0.01');
+  const [withdrawAmount, setWithdrawAmount] = useState('100');
   const [user, setUser] = useState(mockUser);
   const [transactions, setTransactions] = useState(mockTransactions);
 
   const handleAddFunds = async () => {
-    setIsLoading(true);
+    setIsAddingFunds(true);
     if (typeof window.ethereum === 'undefined') {
       toast({
         variant: "destructive",
         title: "Wallet Not Found",
         description: "Please install a wallet extension like MetaMask.",
       });
-      setIsLoading(false);
+      setIsAddingFunds(false);
       return;
     }
 
@@ -49,7 +51,7 @@ export default function WalletPage() {
       
       const tx = await signer.sendTransaction({
         to: "0x000000000000000000000000000000000000dEaD", // Placeholder address
-        value: ethers.parseEther(amount)
+        value: ethers.parseEther(addAmount)
       });
       
       toast({
@@ -59,7 +61,7 @@ export default function WalletPage() {
 
       await tx.wait();
       
-      const ethAmount = parseFloat(amount);
+      const ethAmount = parseFloat(addAmount);
       const creditsToAdd = Math.floor(ethAmount * 10000); // 1 ETH = 10,000 credits
       const dollarValue = creditsToAdd * 0.1;
 
@@ -91,9 +93,73 @@ export default function WalletPage() {
         description: error.message || "An error occurred while sending the transaction.",
       });
     } finally {
-      setIsLoading(false);
+      setIsAddingFunds(false);
       // Close the dialog after handling everything.
       document.getElementById('close-add-funds-dialog')?.click();
+    }
+  };
+
+  const handleWithdrawFunds = async () => {
+    setIsWithdrawing(true);
+    const creditsToWithdraw = parseInt(withdrawAmount, 10);
+
+    if (isNaN(creditsToWithdraw) || creditsToWithdraw <= 0) {
+        toast({
+            variant: "destructive",
+            title: "Invalid Amount",
+            description: "Please enter a valid number of credits to withdraw.",
+        });
+        setIsWithdrawing(false);
+        return;
+    }
+
+    if (creditsToWithdraw > user.campusCredits) {
+        toast({
+            variant: "destructive",
+            title: "Insufficient Balance",
+            description: "You cannot withdraw more credits than you have.",
+        });
+        setIsWithdrawing(false);
+        return;
+    }
+    
+    // In a real application, this would trigger a backend process to send crypto
+    // For this simulation, we'll just update the UI and show a success message.
+    try {
+        // Simulate a delay for the transaction
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const dollarValue = creditsToWithdraw * 0.1;
+
+        setUser(currentUser => ({
+            ...currentUser,
+            campusCredits: currentUser.campusCredits - creditsToWithdraw,
+        }));
+
+        const newTransaction: MockTransaction = {
+            id: `tx-${Date.now()}`,
+            date: new Date().toISOString(),
+            description: 'Cash Withdrawal',
+            amount: dollarValue,
+            type: 'debit',
+        };
+
+        setTransactions(currentTransactions => [newTransaction, ...currentTransactions]);
+        
+        toast({
+            title: "Withdrawal Processed",
+            description: `${creditsToWithdraw} credits have been converted and sent to your wallet.`,
+        });
+
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Withdrawal Failed",
+            description: "An unexpected error occurred.",
+        });
+    } finally {
+        setIsWithdrawing(false);
+        document.getElementById('close-withdraw-dialog')?.click();
     }
   };
 
@@ -130,13 +196,13 @@ export default function WalletPage() {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="py-4">
-                      <Label htmlFor="amount" className="text-right">
+                      <Label htmlFor="add-amount" className="text-right">
                         Amount (ETH)
                       </Label>
                       <Input
-                        id="amount"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
+                        id="add-amount"
+                        value={addAmount}
+                        onChange={(e) => setAddAmount(e.target.value)}
                         className="col-span-3"
                         type="number"
                         step="0.01"
@@ -144,15 +210,47 @@ export default function WalletPage() {
                     </div>
                     <AlertDialogFooter>
                       <AlertDialogCancel id="close-add-funds-dialog">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleAddFunds} disabled={isLoading}>
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      <AlertDialogAction onClick={handleAddFunds} disabled={isAddingFunds}>
+                        {isAddingFunds ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         Proceed
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
 
-                <Button variant="ghost" className="w-full border border-primary-foreground/20 hover:bg-primary-foreground/10">Convert to Cash</Button>
+                 <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" className="w-full border border-primary-foreground/20 hover:bg-primary-foreground/10">Convert to Cash</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Convert Credits to Cash</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Enter the amount of Campus Credits to withdraw. The equivalent value will be sent to your connected wallet. (100 Credits = $10.00)
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="py-4">
+                      <Label htmlFor="withdraw-amount" className="text-right">
+                        Credits to Withdraw
+                      </Label>
+                      <Input
+                        id="withdraw-amount"
+                        value={withdrawAmount}
+                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                        className="col-span-3"
+                        type="number"
+                        step="10"
+                      />
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel id="close-withdraw-dialog">Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleWithdrawFunds} disabled={isWithdrawing}>
+                        {isWithdrawing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Withdraw
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
